@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: my-bank-accounts
+  liquibase:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/my_bank?currentSchema=my_bank_accounts
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5432/my_bank?currentSchema=my_bank_accounts
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}

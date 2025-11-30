@@ -17,6 +17,8 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>my-bank-commons</module>
+        <module>my-bank-accounts</module>
         <module>my-bank-front</module>
         <module>my-bank-api-gateway</module>
     </modules>
@@ -28,12 +30,37 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Commons -->
+            <dependency>
+                <groupId>ru.yandex.practicum</groupId>
+                <artifactId>my-bank-commons</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
+            <!-- Spring Cloud -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>2025.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- Database -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.7.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>r2dbc-postgresql</artifactId>
+                <version>1.0.7.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>4.31.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
