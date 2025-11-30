@@ -18,6 +18,7 @@
 
     <modules>
         <module>my-bank-front</module>
+        <module>my-bank-api-gateway</module>
     </modules>
 
     <properties>
