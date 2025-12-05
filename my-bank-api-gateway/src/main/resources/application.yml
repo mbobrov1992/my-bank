@@ -12,3 +12,9 @@ spring:
                 - Path=/accounts/**
               filters:
                 - RewritePath=/accounts/?(?<segment>.*), /$\{segment}
+            - id: cash-route
+              uri: lb://my-bank-cash
+              predicates:
+                - Path=/cash/**
+              filters:
+                - RewritePath=/cash/?(?<segment>.*), /$\{segment}

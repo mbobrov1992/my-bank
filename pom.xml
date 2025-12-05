@@ -19,6 +19,7 @@
     <modules>
         <module>my-bank-commons</module>
         <module>my-bank-accounts</module>
+        <module>my-bank-cash</module>
         <module>my-bank-front</module>
         <module>my-bank-api-gateway</module>
     </modules>
