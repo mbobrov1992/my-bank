@@ -10,11 +10,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     private static final String ACCOUNTS_URL = "http://my-bank-accounts";
+    private static final String NOTIFICATIONS_URL = "http://my-bank-notifications";
 
     @Bean
     public WebClient accountWebClient(ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter) {
         return webClientBuilder()
                 .baseUrl(ACCOUNTS_URL)
+                .filter(oauth2Filter)
+                .build();
+    }
+
+    @Bean
+    public WebClient notificationWebClient(ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter) {
+        return webClientBuilder()
+                .baseUrl(NOTIFICATIONS_URL)
                 .filter(oauth2Filter)
                 .build();
     }

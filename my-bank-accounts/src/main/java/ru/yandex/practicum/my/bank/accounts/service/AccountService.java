@@ -21,6 +21,7 @@ public class AccountService {
 
     private final AccountRepository accountRepo;
     private final AccountMapper accountMapper;
+    private final NotificationService notificationService;
 
     public Flux<AccountShortDto> getAccounts(String username, boolean excludeCurrent) {
         return accountRepo.findAll()
@@ -30,22 +31,13 @@ public class AccountService {
     }
 
     public Mono<AccountDto> getAccount(String username) {
-        return findAccount(username)
+        return getOrCreateAccount(username)
                 .switchIfEmpty(createAccount(username))
                 .map(accountMapper::toDto);
     }
 
-    private Mono<AccountEnt> createAccount(String username) {
-        return Mono.just(username)
-                .map(UUID::fromString)
-                .map(AccountEnt::new)
-                .flatMap(accountRepo::save)
-                .doOnNext(accountEnt -> log.info("Создан аккаунт пользователя: {}", username))
-                .doOnError(throwable -> log.error("Ошибка создания аккаунта пользователя: {}", username));
-    }
-
     public Mono<AccountDto> editAccount(String username, AccountUpdateDto dto) {
-        return findAccount(username)
+        return getOrCreateAccount(username)
                 .map(account -> {
                     account.setFirstName(dto.firstName());
                     account.setLastName(dto.lastName());
@@ -54,11 +46,23 @@ public class AccountService {
                     return account;
                 })
                 .flatMap(accountRepo::save)
+                .doOnSuccess(notificationService::notifyAccountUpsert)
                 .map(accountMapper::toDto);
     }
 
-    private Mono<AccountEnt> findAccount(String username) {
+    private Mono<AccountEnt> getOrCreateAccount(String username) {
         return accountRepo.findById(UUID.fromString(username))
-                .doOnNext(account -> log.debug("Найден аккаунт пользователя: {}", username));
+                .doOnNext(account -> log.debug("Найден аккаунт пользователя: {}", username))
+                .switchIfEmpty(createAccount(username));
+    }
+
+    private Mono<AccountEnt> createAccount(String username) {
+        return Mono.just(username)
+                .map(UUID::fromString)
+                .map(AccountEnt::new)
+                .flatMap(accountRepo::save)
+                .doOnNext(accountEnt -> log.info("Создан аккаунт пользователя: {}", username))
+                .doOnError(throwable -> log.error("Ошибка создания аккаунта пользователя: {}", username))
+                .doOnSuccess(notificationService::notifyAccountUpsert);
     }
 }

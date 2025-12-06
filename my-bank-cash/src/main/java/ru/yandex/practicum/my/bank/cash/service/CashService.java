@@ -14,8 +14,10 @@ import ru.yandex.practicum.my.bank.commons.model.dto.cash.CashUpdateDto;
 public class CashService {
 
     private final AccountClient accountClient;
+    private final NotificationService notificationService;
 
     public Mono<CashResultDto> editCash(String username, CashUpdateDto request) {
-        return accountClient.editCash(username, request);
+        return accountClient.editCash(username, request)
+                .doOnSuccess(notificationService::notifyCashEdit);
     }
 }

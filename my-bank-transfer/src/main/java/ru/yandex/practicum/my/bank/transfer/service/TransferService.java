@@ -14,8 +14,10 @@ import ru.yandex.practicum.my.bank.transfer.service.client.TransferClient;
 public class TransferService {
 
     private final TransferClient transferClient;
+    private final NotificationService notificationService;
 
     public Mono<TransferResultDto> transfer(String fromUsername, TransferDto request) {
-        return transferClient.transfer(fromUsername, request);
+        return transferClient.transfer(fromUsername, request)
+                .doOnSuccess(notificationService::notifyTransfer);
     }
 }
