@@ -15,3 +15,5 @@ spring:
             client-secret: ${KEYCLOAK_CLIENT_SECRET}
             scope:
               - openid
+  config:
+    import: "consul:"
