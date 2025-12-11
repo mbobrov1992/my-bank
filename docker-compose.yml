@@ -1,0 +1,119 @@
+services:
+  postgres:
+    image: postgres:17.5
+    container_name: my-bank-postgres
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=my_bank
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.1
+    container_name: my-bank-keycloak
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    command: start-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloakdata:/opt/keycloak/data
+
+  consul:
+    image: hashicorp/consul:1.22.1
+    container_name: my-bank-consul
+    ports:
+      - "8500:8500"
+    command: "agent -server -ui -client=0.0.0.0 -bootstrap-expect=1 -data-dir=/consul/data"
+    volumes:
+      - consuldata:/consul/data
+
+  my-bank-front:
+    image: my-bank-front:latest
+    container_name: my-bank-front
+    ports:
+      - "7979:8080"
+    environment:
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${FRONT_KEYCLOAK_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${FRONT_KEYCLOAK_CLIENT_SECRET}
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SERVICE_GATEWAY_URL: http://my-bank-api-gateway:8080
+    depends_on:
+      - keycloak
+      - consul
+
+  my-bank-api-gateway:
+    image: my-bank-api-gateway:latest
+    container_name: my-bank-api-gateway
+    ports:
+      - "8181:8080"
+    environment:
+      SPRING_CLOUD_CONSUL_HOST: consul
+    depends_on:
+      - consul
+
+  my-bank-accounts:
+    image: my-bank-accounts:latest
+    container_name: my-bank-accounts
+    ports:
+      - "8282:8080"
+    environment:
+      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgres:5432/my_bank
+      SPRING_LIQUIBASE_USER: ${DB_USERNAME}
+      SPRING_LIQUIBASE_PASSWORD: ${DB_PASSWORD}
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/my_bank
+      SPRING_R2DBC_USERNAME: ${DB_USERNAME}
+      SPRING_R2DBC_PASSWORD: ${DB_PASSWORD}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${ACCOUNTS_KEYCLOAK_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${ACCOUNTS_KEYCLOAK_CLIENT_SECRET}
+      SPRING_CLOUD_CONSUL_HOST: consul
+    depends_on:
+      - postgres
+      - keycloak
+      - consul
+
+  my-bank-cash:
+    image: my-bank-cash:latest
+    container_name: my-bank-cash
+    ports:
+      - "8383:8080"
+    environment:
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${CASH_KEYCLOAK_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${CASH_KEYCLOAK_CLIENT_SECRET}
+      SPRING_CLOUD_CONSUL_HOST: consul
+    depends_on:
+      - keycloak
+      - consul
+
+  my-bank-transfer:
+    image: my-bank-transfer:latest
+    container_name: my-bank-transfer
+    ports:
+      - "8484:8080"
+    environment:
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${TRANSFER_KEYCLOAK_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${TRANSFER_KEYCLOAK_CLIENT_SECRET}
+      SPRING_CLOUD_CONSUL_HOST: consul
+    depends_on:
+      - keycloak
+      - consul
+
+  my-bank-notifications:
+    image: my-bank-notifications:latest
+    container_name: my-bank-notifications
+    ports:
+      - "8585:8080"
+    environment:
+      SPRING_CLOUD_CONSUL_HOST: consul
+    depends_on:
+      - keycloak
+      - consul
+
+volumes:
+  pgdata:
+  keycloakdata:
+  consuldata:

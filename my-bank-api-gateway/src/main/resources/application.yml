@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: my-bank-api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: accounts-route
+              uri: lb://my-bank-accounts
+              predicates:
+                - Path=/accounts/**
+              filters:
+                - RewritePath=/accounts/?(?<segment>.*), /$\{segment}
+            - id: cash-route
+              uri: lb://my-bank-cash
+              predicates:
+                - Path=/cash/**
+              filters:
+                - RewritePath=/cash/?(?<segment>.*), /$\{segment}
+            - id: transfer-route
+              uri: lb://my-bank-transfer
+              predicates:
+                - Path=/transfer/**
+              filters:
+                - RewritePath=/transfer/?(?<segment>.*), /$\{segment}

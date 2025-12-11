@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: my-bank-notifications
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  config:
+    import: "consul:"
