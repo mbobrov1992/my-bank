@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Release.Name }}-my-bank-ingress"
+spec:
+  rules:
+    - host: "{{ .Release.Name }}-keycloak"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: "{{ .Release.Name }}-keycloak"
+                port:
+                  number: 80
+    - host: "{{ .Release.Name }}-my-bank-front"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: "{{ .Release.Name }}-my-bank-front"
+                port:
+                  number: 8080
