@@ -23,30 +23,20 @@ services:
     volumes:
       - keycloakdata:/opt/keycloak/data
 
-  consul:
-    image: hashicorp/consul:1.22.1
-    container_name: my-bank-consul
-    ports:
-      - "8500:8500"
-    command: "agent -server -ui -client=0.0.0.0 -bootstrap-expect=1 -data-dir=/consul/data"
-    volumes:
-      - consuldata:/consul/data
-
   my-bank-front:
     image: my-bank-front:latest
     container_name: my-bank-front
     ports:
       - "7979:8080"
     environment:
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${FRONT_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${FRONT_KEYCLOAK_CLIENT_SECRET}
-      SPRING_CLOUD_CONSUL_HOST: consul
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       SERVICE_CASH_URL: http://my-bank-cash:8080
       SERVICE_TRANSFER_URL: http://my-bank-transfer:8080
     depends_on:
       - keycloak
-      - consul
 
   my-bank-accounts:
     image: my-bank-accounts:latest
@@ -60,13 +50,14 @@ services:
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/my_bank
       SPRING_R2DBC_USERNAME: ${DB_USERNAME}
       SPRING_R2DBC_PASSWORD: ${DB_PASSWORD}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${ACCOUNTS_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${ACCOUNTS_KEYCLOAK_CLIENT_SECRET}
-      SPRING_CLOUD_CONSUL_HOST: consul
+      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
     depends_on:
       - postgres
       - keycloak
-      - consul
 
   my-bank-cash:
     image: my-bank-cash:latest
@@ -74,12 +65,14 @@ services:
     ports:
       - "8383:8080"
     environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${CASH_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${CASH_KEYCLOAK_CLIENT_SECRET}
-      SPRING_CLOUD_CONSUL_HOST: consul
+      SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
+      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
     depends_on:
       - keycloak
-      - consul
 
   my-bank-transfer:
     image: my-bank-transfer:latest
@@ -87,12 +80,14 @@ services:
     ports:
       - "8484:8080"
     environment:
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${TRANSFER_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${TRANSFER_KEYCLOAK_CLIENT_SECRET}
-      SPRING_CLOUD_CONSUL_HOST: consul
+      SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
+      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
     depends_on:
       - keycloak
-      - consul
 
   my-bank-notifications:
     image: my-bank-notifications:latest
@@ -100,12 +95,10 @@ services:
     ports:
       - "8585:8080"
     environment:
-      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
     depends_on:
       - keycloak
-      - consul
 
 volumes:
   pgdata:
   keycloakdata:
-  consuldata:
