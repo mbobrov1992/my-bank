@@ -13,12 +13,12 @@ import ru.yandex.practicum.my.bank.commons.model.dto.accounts.AccountUpdateDto;
 @RequiredArgsConstructor
 public class AccountClient {
 
-    private static final String ACCOUNTS_V1 = "/accounts/v1/accounts";
+    private static final String ACCOUNTS_V1 = "/v1/accounts";
 
-    private final WebClient apiGatewayClient;
+    private final WebClient accountsWebClient;
 
     public Flux<AccountShortDto> getAccounts() {
-        return apiGatewayClient.get()
+        return accountsWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(ACCOUNTS_V1)
                         .queryParam("excludeCurrent", true)
@@ -28,14 +28,14 @@ public class AccountClient {
     }
 
     public Mono<AccountDto> getAccount() {
-        return apiGatewayClient.get()
+        return accountsWebClient.get()
                 .uri(ACCOUNTS_V1 + "/current")
                 .retrieve()
                 .bodyToMono(AccountDto.class);
     }
 
     public Mono<AccountDto> editAccount(AccountUpdateDto dto) {
-        return apiGatewayClient.post()
+        return accountsWebClient.post()
                 .uri(ACCOUNTS_V1 + "/current")
                 .bodyValue(dto)
                 .retrieve()

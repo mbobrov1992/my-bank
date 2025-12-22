@@ -23,7 +23,6 @@
         <module>my-bank-transfer</module>
         <module>my-bank-notifications</module>
         <module>my-bank-front</module>
-        <module>my-bank-api-gateway</module>
     </modules>
 
     <properties>

@@ -22,12 +22,6 @@
             <artifactId>my-bank-commons</artifactId>
         </dependency>
 
-        <!-- Service Discovery -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
-        </dependency>
-
         <!-- Externalized Config -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

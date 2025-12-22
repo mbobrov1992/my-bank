@@ -11,12 +11,12 @@ import ru.yandex.practicum.my.bank.commons.model.dto.transfer.TransferResultDto;
 @RequiredArgsConstructor
 public class TransferClient {
 
-    private static final String TRANSFER_V1 = "/transfer/v1/transfer";
+    private static final String TRANSFER_V1 = "/v1/transfer";
 
-    private final WebClient apiGatewayClient;
+    private final WebClient transferWebClient;
 
     public Mono<TransferResultDto> transfer(TransferDto dto) {
-        return apiGatewayClient.post()
+        return transferWebClient.post()
                 .uri(TRANSFER_V1)
                 .bodyValue(dto)
                 .retrieve()

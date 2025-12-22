@@ -6,7 +6,6 @@ package:
 
 build: package
 	docker build -t my-bank-front -f Dockerfile ./my-bank-front
-	docker build -t my-bank-api-gateway -f Dockerfile ./my-bank-api-gateway
 	docker build -t my-bank-cash -f Dockerfile ./my-bank-cash
 	docker build -t my-bank-transfer -f Dockerfile ./my-bank-transfer
 	docker build -t my-bank-accounts -f Dockerfile ./my-bank-accounts
@@ -29,5 +28,5 @@ restart: down up
 
 clean:
 	down
-	docker rmi my-bank-front my-bank-api-gateway my-bank-cash my-bank-transfer my-bank-accounts my-bank-notifications || true
+	docker rmi my-bank-front my-bank-cash my-bank-transfer my-bank-accounts my-bank-notifications || true
 	mvn clean
