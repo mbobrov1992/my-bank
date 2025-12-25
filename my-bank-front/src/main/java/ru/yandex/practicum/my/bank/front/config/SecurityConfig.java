@@ -17,8 +17,13 @@ public class SecurityConfig {
             ServerHttpSecurity http,
             ServerLogoutSuccessHandler oidcLogoutSuccessHandler
     ) {
+        String[] permitAntPatterns = new String[]{
+                "/actuator/health"
+        };
+
         return http
                 .authorizeExchange(exchange -> exchange
+                        .pathMatchers(permitAntPatterns).permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
