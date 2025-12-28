@@ -1,3 +1,7 @@
+global:
+  keycloak:
+    issuerUri: http://{{ .Release.Name }}-keycloak/realms/master
+
 keycloak:
   image:
     repository: bitnamilegacy/keycloak

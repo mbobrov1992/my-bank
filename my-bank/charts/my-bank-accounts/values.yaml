@@ -60,7 +60,7 @@ java-app:
 
   env:
     - name: KEYCLOAK_ISSUER_URI
-      value: http://{{ .Release.Name }}-keycloak/realms/master
+      value: "{{ .Values.global.keycloak.issuerUri }}"
     - name: KEYCLOAK_CLIENT_ID
       secretKeyRef:
         name: my-bank-secret

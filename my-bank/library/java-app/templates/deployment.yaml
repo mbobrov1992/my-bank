@@ -71,7 +71,7 @@ spec:
             {{- range .Values.env }}
             {{- if .value }}
             - name: {{ .name }}
-              value: {{ tpl .value $ | quote }}
+              value: {{ tpl (tpl .value $) $ | quote }}
             {{- else if .secretKeyRef }}
             - name: {{ .name }}
               valueFrom:
