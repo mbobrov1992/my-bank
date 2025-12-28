@@ -4,23 +4,17 @@ metadata:
   name: "{{ .Release.Name }}-my-bank-ingress"
 spec:
   rules:
-    - host: "{{ .Release.Name }}-keycloak"
+    {{- range .Values.ingress.hosts }}
+    - host: {{ tpl .host $ | quote }}
       http:
         paths:
-          - path: /
-            pathType: ImplementationSpecific
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: "{{ .Release.Name }}-keycloak"
+                name: {{ tpl .backendServiceName $ | quote }}
                 port:
-                  number: 80
-    - host: "{{ .Release.Name }}-my-bank-front"
-      http:
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: "{{ .Release.Name }}-my-bank-front"
-                port:
-                  number: 8080
+                  name: http
+          {{- end }}
+    {{- end }}

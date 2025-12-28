@@ -25,6 +25,7 @@
 - Docker Engine 28.3+
 - Minikube 1.37+
 - Helm 3.16+
+- Jenkins 2.528+
 
 ## Конфигурация
 
@@ -134,6 +135,18 @@ make deploy
     ```
 
 5. Развернуть Helm-релиз
+
+    Обновить зависимости:
+    ```bash
+    helm dep update ./my-bank
+    helm dep update ./my-bank/charts/my-bank-front
+    helm dep update ./my-bank/charts/my-bank-cash
+    helm dep update ./my-bank/charts/my-bank-transfer
+    helm dep update ./my-bank/charts/my-bank-accounts
+    helm dep update ./my-bank/charts/my-bank-notifications
+    ```
+
+    Установить релиз:
     ```bash
     helm upgrade --install <release-name> ./my-bank
     ```
