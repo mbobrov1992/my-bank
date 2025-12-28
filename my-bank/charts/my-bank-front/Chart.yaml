@@ -1,6 +1,6 @@
 apiVersion: v2
 name: my-bank-front
-description: A Helm chart for Kubernetes
+description: Sub-chart for Front microservice
 type: application
 version: 1.0.0
 appVersion: "1.0.0"
