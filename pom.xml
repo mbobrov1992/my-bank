@@ -23,7 +23,6 @@
         <module>my-bank-transfer</module>
         <module>my-bank-notifications</module>
         <module>my-bank-front</module>
-        <module>my-bank-api-gateway</module>
     </modules>
 
     <properties>
@@ -38,15 +37,6 @@
                 <groupId>ru.yandex.practicum</groupId>
                 <artifactId>my-bank-commons</artifactId>
                 <version>1.0.0</version>
-            </dependency>
-
-            <!-- Spring Cloud -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>2025.0.0</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <!-- Database -->

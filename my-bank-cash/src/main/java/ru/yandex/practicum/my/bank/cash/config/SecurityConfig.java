@@ -13,7 +13,8 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         String[] permitAntPatterns = new String[]{
                 "/v3/api-docs/**",
-                "/swagger-ui/**"
+                "/swagger-ui/**",
+                "/actuator/health"
         };
 
         return http

@@ -9,21 +9,43 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    private final String apiGatewayUrl;
-
-    public WebClientConfig(@Value("${service.gateway.url}") String apiGatewayUrl) {
-        this.apiGatewayUrl = apiGatewayUrl;
+    @Bean
+    public WebClient accountsWebClient(
+            WebClient.Builder webClientBuilder,
+            @Value("${service.accounts.url}") String accountsUrl
+    ) {
+        return webClientBuilder
+                .baseUrl(accountsUrl)
+                .build();
     }
 
     @Bean
-    public WebClient apiGatewayClient(
+    public WebClient cashWebClient(
+            WebClient.Builder webClientBuilder,
+            @Value("${service.cash.url}") String cashUrl
+    ) {
+        return webClientBuilder
+                .baseUrl(cashUrl)
+                .build();
+    }
+
+    @Bean
+    public WebClient transferWebClient(
+            WebClient.Builder webClientBuilder,
+            @Value("${service.transfer.url}") String transferUrl
+    ) {
+        return webClientBuilder
+                .baseUrl(transferUrl)
+                .build();
+    }
+
+    @Bean
+    public WebClient.Builder webClientBuilder(
             ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter,
             ErrorHandlingFilter errorHandlingFilter
     ) {
         return WebClient.builder()
-                .baseUrl(apiGatewayUrl)
                 .filter(oauth2Filter)
-                .filter(errorHandlingFilter)
-                .build();
+                .filter(errorHandlingFilter);
     }
 }

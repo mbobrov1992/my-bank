@@ -1,0 +1,75 @@
+java-app:
+  nameOverride: "my-bank-front"
+
+  replicaCount: 1
+
+  image:
+    repository: my-bank-front
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: false
+    automount: true
+    annotations: {}
+    name: ""
+
+  podAnnotations: {}
+  podLabels: {}
+
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+
+  resources: {}
+
+  autoscaling:
+    enabled: false
+
+  volumes: []
+
+  volumeMounts: []
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  configmap:
+    service:
+      accounts:
+        url: http://{{ .Release.Name }}-my-bank-accounts:8080
+      cash:
+        url: http://{{ .Release.Name }}-my-bank-cash:8080
+      transfer:
+        url: http://{{ .Release.Name }}-my-bank-transfer:8080
+
+  env:
+    - name: KEYCLOAK_ISSUER_URI
+      value: "{{ .Values.global.keycloak.issuerUri }}"
+    - name: KEYCLOAK_CLIENT_ID
+      secretKeyRef:
+        name: my-bank-secret
+        key: front.keycloak.client.id
+    - name: KEYCLOAK_CLIENT_SECRET
+      secretKeyRef:
+        name: my-bank-secret
+        key: front.keycloak.client.secret

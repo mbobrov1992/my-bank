@@ -1,0 +1,6 @@
+apiVersion: v2
+name: java-app
+description: Base chart for My Bank application microservices. Provides shared Kubernetes manifests
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

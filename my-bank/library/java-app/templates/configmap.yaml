@@ -1,0 +1,11 @@
+{{- if .Values.configmap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "java-app.fullname" . }}-application-yml
+  labels:
+    {{- include "java-app.labels" . | nindent 4 }}
+data:
+  application.yml: |-
+    {{- tpl (.Values.configmap | toYaml) . | nindent 4 }}
+{{- end }}

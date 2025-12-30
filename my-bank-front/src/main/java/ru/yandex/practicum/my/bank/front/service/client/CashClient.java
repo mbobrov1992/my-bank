@@ -11,12 +11,12 @@ import ru.yandex.practicum.my.bank.commons.model.dto.cash.CashUpdateDto;
 @RequiredArgsConstructor
 public class CashClient {
 
-    private static final String CASH_V1 = "/cash/v1/cash";
+    private static final String CASH_V1 = "/v1/cash";
 
-    private final WebClient apiGatewayClient;
+    private final WebClient cashWebClient;
 
     public Mono<CashResultDto> editCash(CashUpdateDto dto) {
-        return apiGatewayClient.post()
+        return cashWebClient.post()
                 .uri(CASH_V1)
                 .bodyValue(dto)
                 .retrieve()

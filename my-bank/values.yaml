@@ -1,0 +1,35 @@
+global:
+  image:
+    registry: ""
+    tag: "latest"
+  keycloak:
+    issuerUri: http://{{ .Release.Name }}-keycloak/realms/master
+
+keycloak:
+  image:
+    repository: bitnamilegacy/keycloak
+  auth:
+    adminUser: admin
+    existingSecret: my-bank-secret
+    passwordSecretKey: keycloak.admin.password
+  postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
+    auth:
+      existingSecret: my-bank-secret
+      secretKeys:
+        adminPasswordKey: db.admin.password         # пароль суперпользователя БД
+        userPasswordKey: keycloak.db.user.password  # пароль юзера keycloak к БД
+
+ingress:
+  hosts:
+    - host: "{{ .Release.Name }}-keycloak"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-keycloak"
+    - host: "{{ .Release.Name }}-my-bank-front"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-my-bank-front"
