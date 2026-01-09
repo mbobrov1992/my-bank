@@ -1,8 +1,13 @@
 spring:
   application:
     name: my-bank-notifications
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  kafka:
+    consumer:
+      group-id: ${spring.application.name}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "@project.groupId@.*"
