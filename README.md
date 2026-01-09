@@ -205,8 +205,6 @@ make deploy
     --from-literal=cash.keycloak.client.secret=<value> \
     --from-literal=transfer.keycloak.client.id=my-bank-transfer \
     --from-literal=transfer.keycloak.client.secret=<value> \
-    --from-literal=accounts.keycloak.client.id=my-bank-accounts \
-    --from-literal=accounts.keycloak.client.secret=<value> \
     --from-literal=accounts.db.username=<value> \
     --from-literal=accounts.db.password=<value> \
     --from-literal=keycloak.admin.password=<value> \
