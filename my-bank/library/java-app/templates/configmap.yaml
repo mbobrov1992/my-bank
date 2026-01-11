@@ -7,5 +7,5 @@ metadata:
     {{- include "java-app.labels" . | nindent 4 }}
 data:
   application.yml: |-
-    {{- tpl (.Values.configmap | toYaml) . | nindent 4 }}
+    {{- tpl (tpl (.Values.configmap | toYaml) .) . | nindent 4 }}
 {{- end }}
