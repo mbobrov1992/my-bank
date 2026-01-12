@@ -13,7 +13,7 @@ build: package
 
 # -d означает без привязки к терминалу (detached)
 up:
-	docker-compose up -d postgres kafka keycloak
+	docker-compose up -d postgres kafka keycloak zipkin
 	@echo "⏳ Ожидание запуска инфраструктуры..."
 	@sleep 5
 	docker compose up -d

@@ -80,3 +80,5 @@ java-app:
       value: "{{ .Values.global.kafka.bootstrapServers }}"
     - name: SPRING_KAFKA_CONSUMER_GROUP_ID
       value: "{{ .Release.Name }}-my-bank-notifications"
+    - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+      value: "{{ .Values.global.zipkin.tracing.endpoint }}"

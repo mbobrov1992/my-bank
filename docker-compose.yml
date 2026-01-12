@@ -44,6 +44,12 @@ services:
     volumes:
       - keycloakdata:/opt/keycloak/data
 
+  zipkin:
+    image: openzipkin/zipkin:3.5
+    container_name: my-bank-zipkin
+    ports:
+      - "9411:9411"
+
   my-bank-front:
     image: my-bank-front:latest
     container_name: my-bank-front
@@ -56,6 +62,7 @@ services:
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       SERVICE_CASH_URL: http://my-bank-cash:8080
       SERVICE_TRANSFER_URL: http://my-bank-transfer:8080
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       - keycloak
 
@@ -74,6 +81,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       - postgres
       - keycloak
@@ -92,6 +100,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       - keycloak
       - kafka
@@ -109,6 +118,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       - keycloak
       - kafka
@@ -121,6 +131,7 @@ services:
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
       - keycloak
       - kafka

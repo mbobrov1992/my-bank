@@ -73,3 +73,5 @@ java-app:
       secretKeyRef:
         name: my-bank-secret
         key: front.keycloak.client.secret
+    - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+      value: "{{ .Values.global.zipkin.tracing.endpoint }}"

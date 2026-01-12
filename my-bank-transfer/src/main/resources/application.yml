@@ -1,6 +1,8 @@
 spring:
   application:
     name: my-bank-transfer
+  reactor:
+    context-propagation: auto
   security:
     oauth2:
       resourceserver:
@@ -17,6 +19,13 @@ spring:
             client-id: ${KEYCLOAK_CLIENT_ID}
             client-secret: ${KEYCLOAK_CLIENT_SECRET}
   kafka:
+    template:
+      observation-enabled: true
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

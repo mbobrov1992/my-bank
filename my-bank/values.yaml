@@ -9,6 +9,9 @@ global:
     notifications:
       topic:
         name: "{{ .Release.Name }}-my-bank-notifications"
+  zipkin:
+    tracing:
+      endpoint: http://{{ .Release.Name }}-zipkin:9411/api/v2/spans
 
 kafka:
   image:
@@ -45,6 +48,13 @@ keycloak:
         adminPasswordKey: db.admin.password         # пароль суперпользователя БД
         userPasswordKey: keycloak.db.user.password  # пароль юзера keycloak к БД
 
+zipkin:
+  image:
+    repository: bitnamilegacy/zipkin
+  storageType: mem
+  cassandra:
+    enabled: false
+
 ingress:
   hosts:
     - host: "{{ .Release.Name }}-keycloak"
@@ -57,3 +67,8 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-my-bank-front"
+    - host: "{{ .Release.Name }}-zipkin"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-zipkin"
