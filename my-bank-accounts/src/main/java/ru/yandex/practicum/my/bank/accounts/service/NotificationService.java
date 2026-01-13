@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
-import ru.yandex.practicum.my.bank.accounts.service.client.NotificationClient;
+import ru.yandex.practicum.my.bank.accounts.service.producer.NotificationProducer;
 import ru.yandex.practicum.my.bank.commons.model.dto.notifications.NotificationDto;
 
 import java.time.ZonedDateTime;
@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private final NotificationClient notificationClient;
+    private final NotificationProducer notificationProducer;
 
     public void notifyAccountUpsert(AccountEnt account) {
         Mono.just(new NotificationDto(
@@ -23,7 +23,7 @@ public class NotificationService {
                         "Создан/изменен аккаунт пользователя: " + account.getId(),
                         ZonedDateTime.now()
                 ))
-                .flatMap(notificationClient::notify)
+                .flatMap(notificationProducer::notify)
                 .doOnSuccess(ignore -> log.debug(
                         "Отправлено уведомление о создании/изменении аккаунта: {}", account.getId()))
                 .subscribe();

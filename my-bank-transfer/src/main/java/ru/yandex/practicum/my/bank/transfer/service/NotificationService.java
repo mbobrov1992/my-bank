@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.my.bank.commons.model.dto.notifications.NotificationDto;
 import ru.yandex.practicum.my.bank.commons.model.dto.transfer.TransferResultDto;
-import ru.yandex.practicum.my.bank.transfer.service.client.NotificationClient;
+import ru.yandex.practicum.my.bank.transfer.service.producer.NotificationProducer;
 
 import java.time.ZonedDateTime;
 
@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private final NotificationClient notificationClient;
+    private final NotificationProducer notificationProducer;
 
     public void notifyTransfer(TransferResultDto transfer) {
         String from = transfer.fromUsername();
@@ -26,7 +26,7 @@ public class NotificationService {
                         String.format("Выполнен перевод '%s' -> '%s'", from, to),
                         ZonedDateTime.now()
                 ))
-                .flatMap(notificationClient::notify)
+                .flatMap(notificationProducer::notify)
                 .doOnSuccess(ignore -> log.debug(
                         "Отправлено уведомление о переводе: {} -> {}", from, to))
                 .subscribe();

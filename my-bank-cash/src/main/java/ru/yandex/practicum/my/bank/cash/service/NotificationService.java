@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.my.bank.cash.service.client.NotificationClient;
+import ru.yandex.practicum.my.bank.cash.service.producer.NotificationProducer;
 import ru.yandex.practicum.my.bank.commons.model.dto.cash.CashResultDto;
 import ru.yandex.practicum.my.bank.commons.model.dto.notifications.NotificationDto;
 
@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private final NotificationClient notificationClient;
+    private final NotificationProducer notificationProducer;
 
     public void notifyCashEdit(CashResultDto cashResult) {
         Mono.just(new NotificationDto(
@@ -23,7 +23,7 @@ public class NotificationService {
                         "Изменен баланс пользователя: " + cashResult.username(),
                         ZonedDateTime.now()
                 ))
-                .flatMap(notificationClient::notify)
+                .flatMap(notificationProducer::notify)
                 .doOnSuccess(ignore -> log.debug(
                         "Отправлено уведомление об изменении баланса пользователя: {}", cashResult.username()))
                 .subscribe();

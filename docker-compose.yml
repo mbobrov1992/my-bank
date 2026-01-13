@@ -11,6 +11,27 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  kafka:
+    image: apache/kafka:4.0.0
+    container_name: my-bank-kafka
+    user: root
+    environment:
+      KAFKA_LOG_DIRS: /kafka/data
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@$kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-logs:/kafka/data
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.1
     container_name: my-bank-keycloak
@@ -51,13 +72,12 @@ services:
       SPRING_R2DBC_USERNAME: ${DB_USERNAME}
       SPRING_R2DBC_PASSWORD: ${DB_PASSWORD}
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${ACCOUNTS_KEYCLOAK_CLIENT_ID}
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${ACCOUNTS_KEYCLOAK_CLIENT_SECRET}
-      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
     depends_on:
       - postgres
       - keycloak
+      - kafka
 
   my-bank-cash:
     image: my-bank-cash:latest
@@ -69,10 +89,12 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${CASH_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${CASH_KEYCLOAK_CLIENT_SECRET}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
-      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
+      KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
     depends_on:
       - keycloak
+      - kafka
 
   my-bank-transfer:
     image: my-bank-transfer:latest
@@ -84,10 +106,12 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${TRANSFER_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${TRANSFER_KEYCLOAK_CLIENT_SECRET}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
-      SERVICE_NOTIFICATIONS_URL: http://my-bank-notifications:8080
+      KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
     depends_on:
       - keycloak
+      - kafka
 
   my-bank-notifications:
     image: my-bank-notifications:latest
@@ -95,10 +119,13 @@ services:
     ports:
       - "8585:8080"
     environment:
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
     depends_on:
       - keycloak
+      - kafka
 
 volumes:
   pgdata:
+  kafka-logs:
   keycloakdata:

@@ -57,8 +57,10 @@ java-app:
     service:
       accounts:
         url: http://{{ .Release.Name }}-my-bank-accounts:8080
+    kafka:
       notifications:
-        url: http://{{ .Release.Name }}-my-bank-notifications:8080
+        topic:
+          name: "{{ .Values.global.kafka.notifications.topic.name }}"
 
   env:
     - name: KEYCLOAK_ISSUER_URI
@@ -71,3 +73,5 @@ java-app:
       secretKeyRef:
         name: my-bank-secret
         key: transfer.keycloak.client.secret
+    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+      value: "{{ .Values.global.kafka.bootstrapServers }}"

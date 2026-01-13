@@ -76,7 +76,6 @@ pipeline {
 					usernamePassword(credentialsId: 'front-keycloak-creds', usernameVariable: 'FRONT_CLIENT_ID', passwordVariable: 'FRONT_CLIENT_SECRET'),
 					usernamePassword(credentialsId: 'cash-keycloak-creds', usernameVariable: 'CASH_CLIENT_ID', passwordVariable: 'CASH_CLIENT_SECRET'),
 					usernamePassword(credentialsId: 'transfer-keycloak-creds', usernameVariable: 'TRANSFER_CLIENT_ID', passwordVariable: 'TRANSFER_CLIENT_SECRET'),
-					usernamePassword(credentialsId: 'accounts-keycloak-creds', usernameVariable: 'ACCOUNTS_CLIENT_ID', passwordVariable: 'ACCOUNTS_CLIENT_SECRET'),
 					usernamePassword(credentialsId: 'accounts-db-creds', usernameVariable: 'ACCOUNTS_DB_USERNAME', passwordVariable: 'ACCOUNTS_DB_PASSWORD'),
 					string(credentialsId: 'keycloak-admin-password', variable: 'KEYCLOAK_ADMIN_PASSWORD'),
 					string(credentialsId: 'db-admin-password', variable: 'DB_ADMIN_PASSWORD'),
@@ -91,8 +90,6 @@ pipeline {
 							--from-literal=cash.keycloak.client.secret=$CASH_CLIENT_SECRET \
 							--from-literal=transfer.keycloak.client.id=$TRANSFER_CLIENT_ID \
 							--from-literal=transfer.keycloak.client.secret=$TRANSFER_CLIENT_SECRET \
-							--from-literal=accounts.keycloak.client.id=$ACCOUNTS_CLIENT_ID \
-							--from-literal=accounts.keycloak.client.secret=$ACCOUNTS_CLIENT_SECRET \
 							--from-literal=accounts.db.username=$ACCOUNTS_DB_USERNAME \
 							--from-literal=accounts.db.password=$ACCOUNTS_DB_PASSWORD \
 							--from-literal=keycloak.admin.password=$KEYCLOAK_ADMIN_PASSWORD \

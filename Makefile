@@ -13,7 +13,7 @@ build: package
 
 # -d означает без привязки к терминалу (detached)
 up:
-	docker-compose up -d postgres keycloak
+	docker-compose up -d postgres kafka keycloak
 	@echo "⏳ Ожидание запуска инфраструктуры..."
 	@sleep 5
 	docker compose up -d
@@ -26,7 +26,6 @@ down:
 
 restart: down up
 
-clean:
-	down
+clean: down
 	docker rmi my-bank-front my-bank-cash my-bank-transfer my-bank-accounts my-bank-notifications || true
 	mvn clean

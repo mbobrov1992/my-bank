@@ -21,17 +21,6 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient notificationWebClient(
-            ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter,
-            @Value("${service.notifications.url}") String notificationsUrl
-    ) {
-        return webClientBuilder()
-                .baseUrl(notificationsUrl)
-                .filter(oauth2Filter)
-                .build();
-    }
-
-    @Bean
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }

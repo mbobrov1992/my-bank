@@ -43,6 +43,20 @@ java-app:
   autoscaling:
     enabled: false
 
+  livenessProbe:
+    exec:
+      command: ["pgrep", "-f", "java"]
+    initialDelaySeconds: 20
+    timeoutSeconds: 10
+    periodSeconds: 60
+
+  readinessProbe:
+    exec:
+      command: ["pgrep", "-f", "java"]
+    initialDelaySeconds: 20
+    timeoutSeconds: 10
+    periodSeconds: 60
+
   volumes: []
 
   volumeMounts: []
@@ -54,10 +68,15 @@ java-app:
   affinity: {}
 
   configmap:
-    service:
+    kafka:
       notifications:
-        url: http://{{ .Release.Name }}-my-bank-notifications:8080
+        topic:
+          name: "{{ .Values.global.kafka.notifications.topic.name }}"
 
   env:
     - name: KEYCLOAK_ISSUER_URI
       value: "{{ .Values.global.keycloak.issuerUri }}"
+    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+      value: "{{ .Values.global.kafka.bootstrapServers }}"
+    - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+      value: "{{ .Release.Name }}-my-bank-notifications"

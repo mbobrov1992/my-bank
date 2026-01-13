@@ -4,6 +4,30 @@ global:
     tag: "latest"
   keycloak:
     issuerUri: http://{{ .Release.Name }}-keycloak/realms/master
+  kafka:
+    bootstrapServers: "{{ .Release.Name }}-kafka:9092"
+    notifications:
+      topic:
+        name: "{{ .Release.Name }}-my-bank-notifications"
+
+kafka:
+  image:
+    repository: bitnamilegacy/kafka
+  controller:
+    replicaCount: 1
+  listeners:
+    client:
+      protocol: PLAINTEXT
+    controller:
+      protocol: PLAINTEXT
+    interbroker:
+      protocol: PLAINTEXT
+    external:
+      protocol: PLAINTEXT
+  overrideConfiguration:
+    transaction.state.log.replication.factor: "1"
+    transaction.state.log.min.isr: "1"
+    offsets.topic.replication.factor: "1"
 
 keycloak:
   image:

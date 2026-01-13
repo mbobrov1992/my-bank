@@ -15,11 +15,13 @@
 А также компонентов инфраструктуры:
 - **keycloak** — сервер авторизации OAuth 2.0 для аутентификации пользователей и межсервисной авторизации.
 - **postgres** — база данных.
+- **kafka** — брокер сообщений, используется для передачи уведомлений в сервис **notifications**.
 
 ## Требования
 
 - Java 21
 - PostgreSQL 17+
+- Kafka 3.9+
 - Keycloak 26.3+
 - Maven 3.6+
 - Docker Engine 28.3+
@@ -35,6 +37,15 @@
 
 - `DB_USERNAME` — имя пользователя PostgreSQL
 - `DB_PASSWORD` — пароль пользователя PostgreSQL
+
+### Kafka
+Производители: **accounts**, **cash** и **transfer**.  
+Потребители: **notifications**.
+
+Параметры подключения задаются через переменные окружения:
+
+- `SPRING_KAFKA_BOOTSTRAP_SERVERS` — список адресов Kafka-брокеров
+- `KAFKA_NOTIFICATIONS_TOPIC_NAME` — топик для уведомлений
 
 ### Keycloak
 Сервер авторизации OAuth 2.0, настроенный на Authorization Code Flow для фронтенда и Client Credentials Flow для микросервисов.  
@@ -205,8 +216,6 @@ make deploy
     --from-literal=cash.keycloak.client.secret=<value> \
     --from-literal=transfer.keycloak.client.id=my-bank-transfer \
     --from-literal=transfer.keycloak.client.secret=<value> \
-    --from-literal=accounts.keycloak.client.id=my-bank-accounts \
-    --from-literal=accounts.keycloak.client.secret=<value> \
     --from-literal=accounts.db.username=<value> \
     --from-literal=accounts.db.password=<value> \
     --from-literal=keycloak.admin.password=<value> \
