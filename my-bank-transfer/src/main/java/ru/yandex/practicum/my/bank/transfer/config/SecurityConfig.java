@@ -14,7 +14,8 @@ public class SecurityConfig {
         String[] permitAntPatterns = new String[]{
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
-                "/actuator/health"
+                "/actuator/health",
+                "/actuator/prometheus"
         };
 
         return http

@@ -17,6 +17,8 @@
 - **postgres** — база данных.
 - **kafka** — брокер сообщений, используется для передачи уведомлений в сервис **notifications**.
 - **zipkin** — система трассирования запросов.
+- **prometheus** — система сбора и анализа метрик.
+- **grafana** — система визуализации метрик.
 
 ## Требования
 
@@ -26,6 +28,8 @@
 - Keycloak 26.3+
 - Maven 3.6+
 - Zipkin 3.5+
+- Prometheus v3.9+
+- Grafana 12.3+
 - Docker Engine 28.3+
 - Minikube 1.37+
 - Helm 3.16+
@@ -70,6 +74,21 @@
 Это принудительно сопоставит имя keycloak с локальным loopback-адресом, позволяя браузеру обращаться к Keycloak-серверу  
 на той же машине, как будто это полноценный домен.
 
+### Prometheus
+При запуске через Docker Compose конфигурационный файл монтируется из директории хоста в контейнер:
+```
+~/.prometheus/my-bank-prometheus.yml:/etc/prometheus/prometheus.yml
+```
+В файле должны быть указаны адреса источников метрик (scrape targets).
+
+В Kubernetes конфигурация источников метрик выполняется с помощью [ServiceMonitor (CRD)](my-bank/templates/servicemonitor.yaml).
+
+### Grafana
+После установки в Kubernetes пароль администратора можно найти в секрете: `<release-name>-grafana`.
+
+Импорт дашбордов в Grafana:  
+* Кастомные: ConfigMap с лейблом `grafana.sidecar.dashboards.label` (sidecar-контейнер выполняет поиск и загрузку)
+* Стандартные: внешний URL в `grafana.dashboards` (Helm values)
 
 ## Сборка и управление проектом
 
@@ -176,6 +195,8 @@ make deploy
     127.0.0.1 <release-name>-keycloak
     127.0.0.1 <release-name>-my-bank-front
     127.0.0.1 <release-name>-zipkin
+    127.0.0.1 <release-name>-prometheus
+    127.0.0.1 <release-name>-grafana
     ```
 
 7. Создать сетевой туннель для доступа к сервисам в Minikube кластере

@@ -43,20 +43,6 @@ java-app:
   autoscaling:
     enabled: false
 
-  livenessProbe:
-    exec:
-      command: ["pgrep", "-f", "java"]
-    initialDelaySeconds: 20
-    timeoutSeconds: 10
-    periodSeconds: 60
-
-  readinessProbe:
-    exec:
-      command: ["pgrep", "-f", "java"]
-    initialDelaySeconds: 20
-    timeoutSeconds: 10
-    periodSeconds: 60
-
   volumes: []
 
   volumeMounts: []

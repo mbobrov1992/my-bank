@@ -55,6 +55,51 @@ zipkin:
   cassandra:
     enabled: false
 
+kube-prometheus-stack:
+  kubernetesServiceMonitors:
+    enabled: false
+  kubeStateMetrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  prometheusOperator:
+    serviceMonitor:
+      selfMonitor: false
+  prometheus:
+    serviceMonitor:
+      selfMonitor: false
+  grafana:
+    serviceMonitor:
+      enabled: false
+    defaultDashboardsEnabled: false
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        jvm-micrometer-dashboard:
+          url: https://grafana.com/api/dashboards/4701/revisions/10/download
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        spring-boot-observability-dashboard:
+          url: https://grafana.com/api/dashboards/17175/revisions/2/download
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+  alertmanager:
+    serviceMonitor:
+      selfMonitor: false
+
 ingress:
   hosts:
     - host: "{{ .Release.Name }}-keycloak"
@@ -72,3 +117,13 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-zipkin"
+    - host: "{{ .Release.Name }}-prometheus"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kube-prometheus-stack-prometheus"
+    - host: "{{ .Release.Name }}-grafana"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-grafana"
