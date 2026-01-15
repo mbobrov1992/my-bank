@@ -1,5 +1,6 @@
 package ru.yandex.practicum.my.bank.accounts.service.producer;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,22 +14,32 @@ public class NotificationProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final String notificationTopic;
+    private final MeterRegistry meterRegistry;
 
     public NotificationProducer(
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${kafka.notifications.topic.name}") String notificationTopic
+            @Value("${kafka.notifications.topic.name}") String notificationTopic,
+            MeterRegistry meterRegistry
     ) {
         this.kafkaTemplate = kafkaTemplate;
         this.notificationTopic = notificationTopic;
+        this.meterRegistry = meterRegistry;
     }
 
     public Mono<Void> notify(NotificationDto notification) {
         return Mono.fromFuture(kafkaTemplate.send(notificationTopic, notification.username(), notification))
-                .doOnSuccess(result ->
-                        log.debug("Уведомление отправлено: топик {}, ключ {}",
-                                notificationTopic, notification.username())
+                .doOnSuccess(result -> {
+                            meterRegistry.counter("accounts_notification_success",
+                                    "username", notification.username()).increment();
+                            log.debug("Уведомление отправлено: топик {}, ключ {}",
+                                    notificationTopic, notification.username());
+                        }
                 )
-                .doOnError(e -> log.error("Ошибка отправки уведомления: {}", e.getMessage()))
+                .doOnError(e -> {
+                    meterRegistry.counter("accounts_notification_failure",
+                            "username", notification.username()).increment();
+                    log.error("Ошибка отправки уведомления: {}", e.getMessage());
+                })
                 .then();
     }
 }

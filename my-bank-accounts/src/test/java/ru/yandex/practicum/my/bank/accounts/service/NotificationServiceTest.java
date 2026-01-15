@@ -1,5 +1,6 @@
 package ru.yandex.practicum.my.bank.accounts.service;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -31,7 +32,7 @@ public class NotificationServiceTest {
 
         ProducerFactory<String, Object> producerFactory = new MockProducerFactory<>(() -> mockProducer);
         KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        NotificationProducer notificationProducer = new NotificationProducer(kafkaTemplate, TOPIC);
+        NotificationProducer notificationProducer = new NotificationProducer(kafkaTemplate, TOPIC, new SimpleMeterRegistry());
 
         notificationService = new NotificationService(notificationProducer);
     }

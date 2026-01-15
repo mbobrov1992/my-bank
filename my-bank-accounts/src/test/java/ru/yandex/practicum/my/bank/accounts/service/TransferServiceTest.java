@@ -1,5 +1,6 @@
 package ru.yandex.practicum.my.bank.accounts.service;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataR2dbcTest
-@Import({TestcontainersConfig.class, TransferService.class})
+@Import({TestcontainersConfig.class, TransferService.class, SimpleMeterRegistry.class})
 public class TransferServiceTest {
 
     @Autowired

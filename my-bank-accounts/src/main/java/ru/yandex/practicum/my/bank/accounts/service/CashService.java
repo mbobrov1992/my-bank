@@ -1,5 +1,6 @@
 package ru.yandex.practicum.my.bank.accounts.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import static ru.yandex.practicum.my.bank.commons.model.enums.cash.CashAction.GE
 public class CashService {
 
     private final AccountRepository accountRepo;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public Mono<CashResultDto> editCash(String username, CashUpdateDto request) {
@@ -31,8 +33,14 @@ public class CashService {
                 .switchIfEmpty(Mono.error(new AccountNotFoundException(username)))
                 .flatMap(account -> validateBalanceAndUpdate(account, request))
                 .map(this::buildResult)
-                .doOnSuccess(result -> log.info("Обновлен баланс пользователя: {}", username))
-                .doOnError(ex -> log.error("При обновлении баланса пользователя: {} произошла ошибка: {}", username, ex.getMessage()));
+                .doOnSuccess(result -> {
+                    meterRegistry.counter("accounts_edit_cash_success", "username", username).increment();
+                    log.info("Обновлен баланс пользователя: {}", username);
+                })
+                .doOnError(ex -> {
+                    meterRegistry.counter("accounts_edit_cash_failure", "username", username).increment();
+                    log.error("При обновлении баланса пользователя: {} произошла ошибка: {}", username, ex.getMessage());
+                });
     }
 
     private Mono<AccountEnt> validateBalanceAndUpdate(AccountEnt account, CashUpdateDto request) {
