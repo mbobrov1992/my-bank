@@ -58,6 +58,10 @@ java-app:
       notifications:
         topic:
           name: "{{ .Values.global.kafka.notifications.topic.name }}"
+    logging:
+      kafka:
+        topic:
+          name: "{{ .Values.global.logging.kafka.topic.name }}"
 
   env:
     - name: KEYCLOAK_ISSUER_URI

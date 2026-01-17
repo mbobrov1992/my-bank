@@ -12,6 +12,10 @@ global:
   zipkin:
     tracing:
       endpoint: http://{{ .Release.Name }}-zipkin:9411/api/v2/spans
+  logging:
+    kafka:
+      topic:
+        name: "{{ .Release.Name }}-my-bank-logs"
 
 kafka:
   image:
