@@ -57,6 +57,17 @@ services:
       - "9090:9090"
     volumes:
       - ~/.prometheus/my-bank-prometheus.yml:/etc/prometheus/prometheus.yml
+      - ~/.prometheus/alerts/my-bank-rules.yml:/etc/prometheus/alerts/rules.yml
+
+  alertmanager:
+    image: prom/alertmanager:v0.30.1
+    container_name: my-bank-alertmanager
+    ports:
+      - "9095:9093"
+    volumes:
+      - ~/.prometheus/alerts/my-bank-alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    depends_on:
+      - prometheus
 
   grafana:
     image: grafana/grafana:12.3.1

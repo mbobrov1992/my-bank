@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: {{ .Release.Name }}-my-bank-alertmanager-config
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  route:
+    receiver: 'telegram'
+    groupBy: [ 'alertname' ]
+    groupWait: 0s
+    groupInterval: 30s
+
+  receivers:
+    - name: 'telegram'
+      telegramConfigs:
+        - botToken:
+            name: my-bank-secret
+            key: alertmanager.telegram.bot.token
+          chatID: 462801457
+          parseMode: 'HTML'
+          sendResolved: true
+          message: |
+            {{`{{`}} range .Alerts {{`}}`}}
+            {{`{{`}} if eq .Status "firing" {{`}}`}}🚨{{`{{`}} else {{`}}`}}✅{{`{{`}} end {{`}}`}}
+            {{`{{`}} .Annotations.summary {{`}}`}}
+
+            {{`{{`}} .Annotations.description {{`}}`}}
+
+            Время: <code>{{`{{`}} .StartsAt.Local.Format "15:04:05" {{`}}`}} UTC</code>
+            {{`{{`}} end {{`}}`}}

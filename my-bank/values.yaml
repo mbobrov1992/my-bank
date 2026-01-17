@@ -99,6 +99,8 @@ kube-prometheus-stack:
   alertmanager:
     serviceMonitor:
       selfMonitor: false
+  defaultRules:
+    create: false
 
 ingress:
   hosts:
@@ -122,8 +124,16 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-kube-prometheus-stack-prometheus"
+          backendServicePortName: http-web
+    - host: "{{ .Release.Name }}-alertmanager"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kube-prometheus-stack-alertmanager"
+          backendServicePortName: http-web
     - host: "{{ .Release.Name }}-grafana"
       paths:
         - path: /
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-grafana"
+          backendServicePortName: http-web

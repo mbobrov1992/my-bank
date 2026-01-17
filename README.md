@@ -18,6 +18,7 @@
 - **kafka** — брокер сообщений, используется для передачи уведомлений в сервис **notifications**.
 - **zipkin** — система трассирования запросов.
 - **prometheus** — система сбора и анализа метрик.
+- **alertmanager** — компонент для обработки и отправки уведомлений (алертов), генерируемых Prometheus-сервером.
 - **grafana** — система визуализации метрик.
 
 ## Требования
@@ -29,6 +30,7 @@
 - Maven 3.6+
 - Zipkin 3.5+
 - Prometheus v3.9+
+- Alertmanager v0.30+
 - Grafana 12.3+
 - Docker Engine 28.3+
 - Minikube 1.37+
@@ -110,7 +112,22 @@
 ```
 В файле должны быть указаны адреса источников метрик (scrape targets).
 
+Файл с правилами алертов также монтируется из директории хоста в контейнер:
+```
+~/.prometheus/alerts/my-bank-rules.yml:/etc/prometheus/alerts/rules.yml
+```
+
 В Kubernetes конфигурация источников метрик выполняется с помощью [ServiceMonitor (CRD)](my-bank/templates/servicemonitor.yaml).
+Конфигурация правил алертов выполняется с помощью [PrometheusRule (CRD)](my-bank/templates/prometheusrule.yaml).
+
+### Alertmanager
+При запуске через Docker Compose конфигурационный файл монтируется из директории хоста в контейнер:
+```
+~/.prometheus/alerts/my-bank-alertmanager.yml:/etc/alertmanager/alertmanager.yml
+```
+В файле должны быть указаны правила отправки уведомлений.
+
+В Kubernetes конфигурация выполняется с помощью [AlertmanagerConfig (CRD)](my-bank/templates/alertmanagerconfig.yaml).
 
 ### Grafana
 После установки в Kubernetes пароль администратора можно найти в секрете: `<release-name>-grafana`.
@@ -225,6 +242,7 @@ make deploy
     127.0.0.1 <release-name>-my-bank-front
     127.0.0.1 <release-name>-zipkin
     127.0.0.1 <release-name>-prometheus
+    127.0.0.1 <release-name>-alertmanager
     127.0.0.1 <release-name>-grafana
     ```
 
@@ -274,6 +292,7 @@ make deploy
     --from-literal=keycloak.admin.password=<value> \
     --from-literal=db.admin.password=<value> \
     --from-literal=keycloak.db.user.password=<value> \
+    --from-literal=alertmanager.telegram.bot.token=<value> \
     --dry-run=client -o yaml | kubectl apply -f -
     ```
 

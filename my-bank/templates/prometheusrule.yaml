@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-my-bank-prometheus-rule
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: {{ .Release.Name }}-my-bank-alerts
+      rules:
+        - alert: UserEditCashFailureSpike
+          expr: sum by (username) (increase(accounts_edit_cash_failure_total[1m])) > 3
+          for: 0s
+          labels:
+            namespace: {{ .Release.Namespace }}
+            severity: warning
+          annotations:
+            summary: "Ошибки пополнения/списания баланса.\nПользователь {{`{{`}} $labels.username {{`}}`}}"
+            description: "{{`{{`}} $value | printf \"%.1f\" {{`}}`}} неудач/мин (порог > 3)."
