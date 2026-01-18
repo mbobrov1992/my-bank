@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/kibana/kibana
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5601
+
+resources:
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+
+env:
+  - name: ELASTICSEARCH_HOSTS
+    value: "http://{{ .Release.Name }}-elasticsearch:9200"
+  - name: SERVER_NAME
+    value: "kibana"
+  - name: SERVER_HOST
+    value: "0.0.0.0"
+  - name: XPACK_SECURITY_ENABLED
+    value: "false"
+  - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+    value: "min-32-byte-long-strong-encryption-key-value"

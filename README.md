@@ -272,6 +272,7 @@ make deploy
     127.0.0.1 <release-name>-prometheus
     127.0.0.1 <release-name>-alertmanager
     127.0.0.1 <release-name>-grafana
+    127.0.0.1 <release-name>-kibana
     ```
 
 7. Создать сетевой туннель для доступа к сервисам в Minikube кластере

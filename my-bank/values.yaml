@@ -141,3 +141,8 @@ ingress:
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-grafana"
           backendServicePortName: http-web
+    - host: "{{ .Release.Name }}-kibana"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kibana"

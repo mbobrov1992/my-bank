@@ -18,3 +18,12 @@ dependencies:
   - name: kube-prometheus-stack
     version: "80.14.2"
     repository: "oci://ghcr.io/prometheus-community/charts"
+  - name: logstash
+    version: "1.0.0"
+    repository: "file://charts/logstash"
+  - name: elasticsearch
+    version: "1.0.0"
+    repository: "file://charts/elasticsearch"
+  - name: kibana
+    version: "1.0.0"
+    repository: "file://charts/kibana"
