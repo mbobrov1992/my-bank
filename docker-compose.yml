@@ -79,6 +79,14 @@ services:
     depends_on:
       - prometheus
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.2.4
+    container_name: my-bank-logstash
+    volumes:
+      - ~/.logstash/pipeline/:/usr/share/logstash/pipeline/
+    depends_on:
+      - kafka
+
   my-bank-front:
     image: my-bank-front:latest
     container_name: my-bank-front
