@@ -79,6 +79,16 @@ services:
     depends_on:
       - prometheus
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.4
+    container_name: my-bank-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+
   logstash:
     image: docker.elastic.co/logstash/logstash:9.2.4
     container_name: my-bank-logstash
@@ -86,6 +96,7 @@ services:
       - ~/.logstash/pipeline/:/usr/share/logstash/pipeline/
     depends_on:
       - kafka
+      - elasticsearch
 
   my-bank-front:
     image: my-bank-front:latest
