@@ -98,6 +98,16 @@ services:
       - kafka
       - elasticsearch
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.2.4
+    container_name: my-bank-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
   my-bank-front:
     image: my-bank-front:latest
     container_name: my-bank-front
