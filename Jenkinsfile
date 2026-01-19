@@ -122,7 +122,8 @@ pipeline {
                 helm upgrade --install $RELEASE ./my-bank \
                 	--namespace $NAMESPACE \
 					--set global.image.registry=$IMAGE_REGISTRY \
-					--set global.image.tag=$IMAGE_TAG
+					--set global.image.tag=$IMAGE_TAG \
+					--timeout=30m
                 '''
             }
         }

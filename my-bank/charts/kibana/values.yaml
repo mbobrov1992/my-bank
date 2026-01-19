@@ -10,11 +10,11 @@ service:
 
 resources:
   limits:
-    memory: "1Gi"
-    cpu: "500m"
+    cpu: "1500m"
+    memory: "2Gi"
   requests:
-    memory: "512Mi"
-    cpu: "250m"
+    cpu: "1"
+    memory: "1Gi"
 
 env:
   - name: ELASTICSEARCH_HOSTS

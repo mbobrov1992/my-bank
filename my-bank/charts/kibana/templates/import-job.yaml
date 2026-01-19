@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kibana.fullname" . }}-import-job
+  labels:
+    {{- include "kibana.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        {{- include "kibana.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: import-ndjson
+          image: curlimages/curl:7.87.0
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for Kibana..."
+              until curl -s http://{{ include "kibana.fullname" . }}:5601/api/status | grep -q '"level":"available"'; do
+                sleep 5
+              done
+              echo "Importing dashboard.ndjson..."
+              curl -X POST "http://{{ include "kibana.fullname" . }}:5601/api/saved_objects/_import?overwrite=true" \
+                -H "kbn-xsrf: true" \
+                --form file=@/data/dashboard.ndjson \
+                --fail || echo "Import failed, will retry on upgrade"
+          volumeMounts:
+            - name: ndjson
+              mountPath: /data
+      restartPolicy: Never
+      volumes:
+        - name: ndjson
+          configMap:
+            name: {{ include "kibana.fullname" . }}-my-bank-dashboard

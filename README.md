@@ -164,6 +164,8 @@
 
 - `ELASTICSEARCH_HOSTS`
 
+После установки в Kubernetes выполняется импорт Dashboard с помощью [Job (post-install hook)](my-bank/charts/kibana/templates/import-job.yaml).
+
 ## Сборка и управление проектом
 
 В рамках мультипроекта все микросервисы собираются с помощью Maven, каждый сервис — подмодуль.
