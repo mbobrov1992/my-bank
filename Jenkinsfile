@@ -123,6 +123,7 @@ pipeline {
                 	--namespace $NAMESPACE \
 					--set global.image.registry=$IMAGE_REGISTRY \
 					--set global.image.tag=$IMAGE_TAG \
+					--wait --atomic \
 					--timeout=30m
                 '''
             }
