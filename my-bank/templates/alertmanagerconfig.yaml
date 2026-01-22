@@ -17,7 +17,7 @@ spec:
         - botToken:
             name: my-bank-secret
             key: alertmanager.telegram.bot.token
-          chatID: 462801457
+          chatID: {{ .Values.global.alertmanager.telegram.chatID }}
           parseMode: 'HTML'
           sendResolved: true
           message: |

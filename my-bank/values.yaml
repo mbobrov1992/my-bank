@@ -16,6 +16,9 @@ global:
     kafka:
       topic:
         name: "{{ .Release.Name }}-my-bank-logs"
+  alertmanager:
+    telegram:
+      chatID: "462801457"
 
 kafka:
   image:
