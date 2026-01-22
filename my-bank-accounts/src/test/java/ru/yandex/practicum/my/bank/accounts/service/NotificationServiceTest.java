@@ -11,8 +11,9 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.mock.MockProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
-import ru.yandex.practicum.my.bank.accounts.service.producer.NotificationProducer;
+import ru.yandex.practicum.my.bank.commons.metrics.NotificationMetrics;
 import ru.yandex.practicum.my.bank.commons.model.dto.notifications.NotificationDto;
+import ru.yandex.practicum.my.bank.commons.service.NotificationProducer;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +33,8 @@ public class NotificationServiceTest {
 
         ProducerFactory<String, Object> producerFactory = new MockProducerFactory<>(() -> mockProducer);
         KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        NotificationProducer notificationProducer = new NotificationProducer(kafkaTemplate, TOPIC, new SimpleMeterRegistry());
+        NotificationMetrics notificationMetrics = new NotificationMetrics(new SimpleMeterRegistry());
+        NotificationProducer notificationProducer = new NotificationProducer(kafkaTemplate, TOPIC, notificationMetrics);
 
         notificationService = new NotificationService(notificationProducer);
     }

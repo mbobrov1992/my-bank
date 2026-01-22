@@ -133,6 +133,7 @@ data:
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "Prometheus"
           },
           "description": "Статистика отправки уведомлений",
@@ -160,8 +161,8 @@ data:
             "overrides": [
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": ".*не отправлено.*"
+                  "id": "byName",
+                  "options": "notification_failure_total"
                 },
                 "properties": [
                   {
@@ -202,61 +203,9 @@ data:
           "pluginVersion": "12.3.1",
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "Prometheus"
-              },
               "editorMode": "builder",
-              "expr": "cash_notification_success_total",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "О пополнении/списании",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "Prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "cash_notification_failure_total",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "О пополнении/списании (не отправлено)",
-              "range": true,
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "Prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "transfer_notification_success_total",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "О переводе",
-              "range": true,
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "Prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "transfer_notification_failure_total",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "О переводе (не отправлено)",
-              "range": true,
-              "refId": "F"
-            },
-            {
-              "editorMode": "builder",
-              "expr": "accounts_notification_success_total",
-              "legendFormat": "Об аккаунте",
+              "expr": "notification_success_total",
+              "legendFormat": "{{`{{`}}instance{{`}}`}}",
               "range": true,
               "refId": "A"
             },
@@ -266,10 +215,10 @@ data:
                 "uid": "Prometheus"
               },
               "editorMode": "builder",
-              "expr": "accounts_notification_failure_total",
+              "expr": "notification_failure_total",
               "hide": false,
               "instant": false,
-              "legendFormat": "Об аккаунте (не отправлено)",
+              "legendFormat": "{{`{{`}}instance{{`}}`}}",
               "range": true,
               "refId": "B"
             }
@@ -386,5 +335,5 @@ data:
       "timezone": "browser",
       "title": "My Bank",
       "uid": "ad959fn",
-      "version": 22
+      "version": 32
     }
