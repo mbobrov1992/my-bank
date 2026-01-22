@@ -1,11 +1,12 @@
 package ru.yandex.practicum.my.bank.accounts.service;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.my.bank.accounts.event.TransferEvent;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
 import ru.yandex.practicum.my.bank.accounts.repository.AccountRepository;
 import ru.yandex.practicum.my.bank.commons.model.dto.transfer.TransferDto;
@@ -22,7 +23,7 @@ import java.util.UUID;
 public class TransferService {
 
     private final AccountRepository accountRepo;
-    private final MeterRegistry meterRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Mono<TransferResultDto> transfer(String fromUsername, TransferDto request) {
@@ -31,17 +32,11 @@ public class TransferService {
                 .flatMap(tuple ->
                         processTransfer(tuple.getT1(), tuple.getT2(), request.amount()))
                 .doOnSuccess(result -> {
-                    meterRegistry.counter(
-                            "accounts_transfer_cash_success",
-                            "fromUsername", fromUsername, "toUsername", request.toUsername()
-                    ).increment();
+                    eventPublisher.publishEvent(new TransferEvent(this, fromUsername, request.toUsername(), true));
                     log.info("Выполнен перевод '{}' -> '{}' на сумму: {}", fromUsername, request.toUsername(), request.amount());
                 })
                 .doOnError(ex -> {
-                    meterRegistry.counter(
-                            "accounts_transfer_cash_failure",
-                            "fromUsername", fromUsername, "toUsername", request.toUsername()
-                    ).increment();
+                    eventPublisher.publishEvent(new TransferEvent(this, fromUsername, request.toUsername(), false));
                     log.error("Ошибка перевода '{}' -> '{}': {}", fromUsername, request.toUsername(), ex.getMessage());
                 });
     }

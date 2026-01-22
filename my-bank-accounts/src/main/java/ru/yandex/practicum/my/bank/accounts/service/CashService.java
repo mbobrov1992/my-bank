@@ -1,11 +1,12 @@
 package ru.yandex.practicum.my.bank.accounts.service;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.my.bank.accounts.event.CashEditEvent;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
 import ru.yandex.practicum.my.bank.accounts.repository.AccountRepository;
 import ru.yandex.practicum.my.bank.commons.model.dto.cash.CashResultDto;
@@ -25,7 +26,7 @@ import static ru.yandex.practicum.my.bank.commons.model.enums.cash.CashAction.GE
 public class CashService {
 
     private final AccountRepository accountRepo;
-    private final MeterRegistry meterRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Mono<CashResultDto> editCash(String username, CashUpdateDto request) {
@@ -34,11 +35,11 @@ public class CashService {
                 .flatMap(account -> validateBalanceAndUpdate(account, request))
                 .map(this::buildResult)
                 .doOnSuccess(result -> {
-                    meterRegistry.counter("accounts_edit_cash_success", "username", username).increment();
+                    eventPublisher.publishEvent(new CashEditEvent(this, username, true));
                     log.info("Обновлен баланс пользователя: {}", username);
                 })
                 .doOnError(ex -> {
-                    meterRegistry.counter("accounts_edit_cash_failure", "username", username).increment();
+                    eventPublisher.publishEvent(new CashEditEvent(this, username, false));
                     log.error("При обновлении баланса пользователя: {} произошла ошибка: {}", username, ex.getMessage());
                 });
     }
