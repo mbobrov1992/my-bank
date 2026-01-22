@@ -9,11 +9,29 @@ spec:
     - name: {{ .Release.Name }}-my-bank-alerts
       rules:
         - alert: UserEditCashFailureSpike
-          expr: sum by (username) (increase(accounts_edit_cash_failure_total[1m])) > 3
+          expr: sum by (instance) (increase(accounts_edit_cash_failure_total[1m])) > 3
           for: 0s
           labels:
             namespace: {{ .Release.Namespace }}
             severity: warning
           annotations:
-            summary: "Ошибки пополнения/списания баланса.\nПользователь {{`{{`}} $labels.username {{`}}`}}"
+            summary: "Ошибки пополнения/списания баланса.\nСервис {{`{{`}} $labels.instance {{`}}`}}"
             description: "{{`{{`}} $value | printf \"%.1f\" {{`}}`}} неудач/мин (порог > 3)."
+        - alert: UserTransferCashFailureSpike
+          expr: sum by (instance) (increase(accounts_transfer_cash_failure_total[1m])) > 3
+          for: 0s
+          labels:
+            namespace: {{ .Release.Namespace }}
+            severity: warning
+          annotations:
+            summary: "Ошибки перевода средств.\nСервис {{`{{`}} $labels.instance {{`}}`}}"
+            description: "{{`{{`}} $value | printf \"%.1f\" {{`}}`}} неудач/мин (порог > 3)."
+        - alert: InstanceDown
+          expr: up == 0
+          for: 3m
+          labels:
+            namespace: {{ .Release.Namespace }}
+            severity: critical
+          annotations:
+            summary: "Недоступен сервис {{`{{`}} $labels.instance {{`}}`}}"
+            description: "Время недоступности более 3 минут"
