@@ -31,7 +31,11 @@ config:
     filter {
       grok {
         match => {
-          "message" => "%{TIMESTAMP_ISO8601:timestamp}%{SPACE}%{LOGLEVEL:level}%{SPACE}%{NUMBER:pid:int}%{SPACE}\[%{DATA:service}\]%{SPACE}\[%{DATA:thread}\]%{SPACE}\[%{DATA:traceId},%{DATA:spanId}]%{SPACE}%{JAVACLASS:logger}%{SPACE}:%{SPACE}%{GREEDYDATA:message}"
+          "message" => [
+            "%{TIMESTAMP_ISO8601:timestamp}%{SPACE}%{LOGLEVEL:level}%{SPACE}%{NUMBER:pid:int}%{SPACE}\[%{DATA:service}\]%{SPACE}\[%{DATA:thread}\]%{SPACE}\[%{DATA:traceId},%{DATA:spanId}]%{SPACE}%{JAVACLASS:logger}%{SPACE}:%{SPACE}%{GREEDYDATA:message}",
+            "%{TIMESTAMP_ISO8601:timestamp}%{SPACE}%{LOGLEVEL:level}%{GREEDYDATA:message}",
+            "%{GREEDYDATA:message}"
+          ]
         }
         overwrite => [ "message" ]
       }
