@@ -2,9 +2,11 @@ package ru.yandex.practicum.my.bank.accounts.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.my.bank.accounts.event.TransferEvent;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
 import ru.yandex.practicum.my.bank.accounts.repository.AccountRepository;
 import ru.yandex.practicum.my.bank.commons.model.dto.transfer.TransferDto;
@@ -21,13 +23,22 @@ import java.util.UUID;
 public class TransferService {
 
     private final AccountRepository accountRepo;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Mono<TransferResultDto> transfer(String fromUsername, TransferDto request) {
         return Mono.zip(getOrThrow(fromUsername),
                         getOrThrow(request.toUsername()))
                 .flatMap(tuple ->
-                        processTransfer(tuple.getT1(), tuple.getT2(), request.amount()));
+                        processTransfer(tuple.getT1(), tuple.getT2(), request.amount()))
+                .doOnSuccess(result -> {
+                    eventPublisher.publishEvent(new TransferEvent(this, fromUsername, request.toUsername(), true));
+                    log.info("Выполнен перевод '{}' -> '{}' на сумму: {}", fromUsername, request.toUsername(), request.amount());
+                })
+                .doOnError(ex -> {
+                    eventPublisher.publishEvent(new TransferEvent(this, fromUsername, request.toUsername(), false));
+                    log.error("Ошибка перевода '{}' -> '{}': {}", fromUsername, request.toUsername(), ex.getMessage());
+                });
     }
 
     private Mono<AccountEnt> getOrThrow(String username) {
@@ -45,10 +56,6 @@ public class TransferService {
 
         return Mono.zip(accountRepo.updateBalance(fromAccount.getId(), amount.negate()),
                         accountRepo.updateBalance(toAccount.getId(), amount))
-                .thenReturn(new TransferResultDto(UUID.randomUUID(), fromUsername, toUsername))
-                .doOnSuccess(result -> log.info(
-                        "Выполнен перевод '{}' -> '{}' на сумму: {}", fromUsername, toUsername, amount))
-                .doOnError(ex -> log.error(
-                        "Ошибка перевода '{}' -> '{}': {}", fromUsername, toUsername, ex.getMessage()));
+                .thenReturn(new TransferResultDto(UUID.randomUUID(), fromUsername, toUsername));
     }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%5p} %pid --- [${spring:spring.application.name}] [%10.10t] [%X{traceId},%X{spanId}] %c{1.} : %msg%n"/>
+        </Console>
+
+        <Kafka name="Kafka"
+               topic="${spring:logging.kafka.topic.name}"
+               syncSend="${spring:logging.kafka.sync-send:true}">
+            <Property name="bootstrap.servers">${spring:spring.kafka.bootstrap-servers}</Property>
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p %pid [${spring:spring.application.name}] [%10.10t] [%X{traceId},%X{spanId}] %c{1.} : %msg"/>
+        </Kafka>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Kafka"/>
+        </Root>
+
+        <Logger name="org.apache.kafka" level="WARN" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="ru.yandex.practicum" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Kafka"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>

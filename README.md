@@ -16,6 +16,13 @@
 - **keycloak** — сервер авторизации OAuth 2.0 для аутентификации пользователей и межсервисной авторизации.
 - **postgres** — база данных.
 - **kafka** — брокер сообщений, используется для передачи уведомлений в сервис **notifications**.
+- **zipkin** — система трассирования запросов.
+- **prometheus** — система сбора и анализа метрик.
+- **alertmanager** — компонент для обработки и отправки уведомлений (алертов), генерируемых Prometheus-сервером.
+- **grafana** — система визуализации метрик.
+- **elasticsearch** — система для хранения, поиска и анализа логов.
+- **logstash** — инструмент для сбора и обработки логов в реальном времени.
+- **kibana** — система визуализации и анализа логов.
 
 ## Требования
 
@@ -24,6 +31,13 @@
 - Kafka 3.9+
 - Keycloak 26.3+
 - Maven 3.6+
+- Zipkin 3.5+
+- Prometheus v3.9+
+- Alertmanager v0.30+
+- Grafana 12.3+
+- Elasticsearch 9.2+
+- Logstash 9.2+
+- Kibana 9.2+
 - Docker Engine 28.3+
 - Minikube 1.37+
 - Helm 3.16+
@@ -68,6 +82,60 @@
 Это принудительно сопоставит имя keycloak с локальным loopback-адресом, позволяя браузеру обращаться к Keycloak-серверу  
 на той же машине, как будто это полноценный домен.
 
+### Prometheus
+При запуске через Docker Compose конфигурационный файл монтируется из директории хоста в контейнер:
+```
+~/.prometheus/my-bank-prometheus.yml:/etc/prometheus/prometheus.yml
+```
+В файле должны быть указаны адреса источников метрик (scrape targets).
+
+Файл с правилами алертов также монтируется из директории хоста в контейнер:
+```
+~/.prometheus/alerts/my-bank-rules.yml:/etc/prometheus/alerts/rules.yml
+```
+
+В Kubernetes конфигурация источников метрик выполняется с помощью [ServiceMonitor (CRD)](my-bank/templates/servicemonitor.yaml).
+Конфигурация правил алертов выполняется с помощью [PrometheusRule (CRD)](my-bank/templates/prometheusrule.yaml).
+
+### Alertmanager
+При запуске через Docker Compose конфигурационный файл монтируется из директории хоста в контейнер:
+```
+~/.prometheus/alerts/my-bank-alertmanager.yml:/etc/alertmanager/alertmanager.yml
+```
+В файле должны быть указаны правила отправки уведомлений.
+
+В Kubernetes конфигурация выполняется с помощью [AlertmanagerConfig (CRD)](my-bank/templates/alertmanagerconfig.yaml).
+
+### Grafana
+После установки в Kubernetes пароль администратора можно найти в секрете: `<release-name>-grafana`.
+
+Импорт дашбордов в Grafana:  
+* Кастомные: ConfigMap с лейблом `grafana.sidecar.dashboards.label` (sidecar-контейнер выполняет поиск и загрузку)
+* Стандартные: внешний URL в `grafana.dashboards` (Helm values)
+
+### Log4j2
+Логирование выполняется с помощью библиотеки Log4j2 в консоль и топик Kafka.  
+Параметры задаются через переменные окружения:
+
+- `SPRING_KAFKA_BOOTSTRAP_SERVERS` — список адресов Kafka-брокеров
+- `LOGGING_KAFKA_TOPIC_NAME` — топик Kafka для записи логов
+
+### Logstash
+При запуске через Docker Compose директория с пайплайнами монтируется из директории хоста в контейнер:
+```
+~/.logstash/pipeline/:/usr/share/logstash/pipeline/
+```
+В директорию должен быть добавлен файл с расширением `.conf` с описанием пайплайна:  
+1. получение логов из Kafka
+2. обработка
+3. отправка в Elasticsearch
+
+### Kibana
+При запуске через Docker Compose для подключения Kibana к Elasticsearch используется переменная окружения:
+
+- `ELASTICSEARCH_HOSTS`
+
+После установки в Kubernetes выполняется импорт Dashboard с помощью [Job (post-install hook)](my-bank/charts/kibana/templates/import-job.yaml).
 
 ## Сборка и управление проектом
 
@@ -173,6 +241,11 @@ make deploy
     ```
     127.0.0.1 <release-name>-keycloak
     127.0.0.1 <release-name>-my-bank-front
+    127.0.0.1 <release-name>-zipkin
+    127.0.0.1 <release-name>-prometheus
+    127.0.0.1 <release-name>-alertmanager
+    127.0.0.1 <release-name>-grafana
+    127.0.0.1 <release-name>-kibana
     ```
 
 7. Создать сетевой туннель для доступа к сервисам в Minikube кластере
@@ -221,6 +294,7 @@ make deploy
     --from-literal=keycloak.admin.password=<value> \
     --from-literal=db.admin.password=<value> \
     --from-literal=keycloak.db.user.password=<value> \
+    --from-literal=alertmanager.telegram.bot.token=<value> \
     --dry-run=client -o yaml | kubectl apply -f -
     ```
 

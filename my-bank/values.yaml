@@ -9,6 +9,16 @@ global:
     notifications:
       topic:
         name: "{{ .Release.Name }}-my-bank-notifications"
+  zipkin:
+    tracing:
+      endpoint: http://{{ .Release.Name }}-zipkin:9411/api/v2/spans
+  logging:
+    kafka:
+      topic:
+        name: "{{ .Release.Name }}-my-bank-logs"
+  alertmanager:
+    telegram:
+      chatID: "462801457"
 
 kafka:
   image:
@@ -45,6 +55,60 @@ keycloak:
         adminPasswordKey: db.admin.password         # пароль суперпользователя БД
         userPasswordKey: keycloak.db.user.password  # пароль юзера keycloak к БД
 
+zipkin:
+  image:
+    repository: bitnamilegacy/zipkin
+  storageType: mem
+  cassandra:
+    enabled: false
+
+kube-prometheus-stack:
+  kubernetesServiceMonitors:
+    enabled: false
+  kubeStateMetrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  prometheusOperator:
+    serviceMonitor:
+      selfMonitor: false
+  prometheus:
+    serviceMonitor:
+      selfMonitor: false
+  grafana:
+    serviceMonitor:
+      enabled: false
+    defaultDashboardsEnabled: false
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        jvm-micrometer-dashboard:
+          url: https://grafana.com/api/dashboards/4701/revisions/10/download
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        spring-boot-observability-dashboard:
+          url: https://grafana.com/api/dashboards/17175/revisions/2/download
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+  alertmanager:
+    serviceMonitor:
+      selfMonitor: false
+  defaultRules:
+    create: false
+
 ingress:
   hosts:
     - host: "{{ .Release.Name }}-keycloak"
@@ -57,3 +121,31 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
           backendServiceName: "{{ .Release.Name }}-my-bank-front"
+    - host: "{{ .Release.Name }}-zipkin"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-zipkin"
+    - host: "{{ .Release.Name }}-prometheus"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kube-prometheus-stack-prometheus"
+          backendServicePortName: http-web
+    - host: "{{ .Release.Name }}-alertmanager"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kube-prometheus-stack-alertmanager"
+          backendServicePortName: http-web
+    - host: "{{ .Release.Name }}-grafana"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-grafana"
+          backendServicePortName: http-web
+    - host: "{{ .Release.Name }}-kibana"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backendServiceName: "{{ .Release.Name }}-kibana"

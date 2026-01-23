@@ -1,0 +1,6 @@
+apiVersion: v2
+name: elasticsearch
+description: Sub-chart for Elasticsearch
+type: application
+version: 1.0.0
+appVersion: "9.2.4"

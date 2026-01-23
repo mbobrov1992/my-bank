@@ -1,0 +1,6 @@
+apiVersion: v2
+name: logstash
+description: Sub-chart for Logstash
+type: application
+version: 1.0.0
+appVersion: "9.2.4"

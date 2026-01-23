@@ -2,17 +2,19 @@ package ru.yandex.practicum.my.bank.accounts.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.my.bank.accounts.model.entity.AccountEnt;
-import ru.yandex.practicum.my.bank.accounts.service.producer.NotificationProducer;
 import ru.yandex.practicum.my.bank.commons.model.dto.notifications.NotificationDto;
+import ru.yandex.practicum.my.bank.commons.service.NotificationProducer;
 
 import java.time.ZonedDateTime;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Import(NotificationProducer.class)
 public class NotificationService {
 
     private final NotificationProducer notificationProducer;

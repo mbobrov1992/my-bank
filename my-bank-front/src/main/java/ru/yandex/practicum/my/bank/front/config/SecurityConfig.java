@@ -18,7 +18,8 @@ public class SecurityConfig {
             ServerLogoutSuccessHandler oidcLogoutSuccessHandler
     ) {
         String[] permitAntPatterns = new String[]{
-                "/actuator/health"
+                "/actuator/health",
+                "/actuator/prometheus"
         };
 
         return http

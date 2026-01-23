@@ -58,6 +58,10 @@ java-app:
       notifications:
         topic:
           name: "{{ .Values.global.kafka.notifications.topic.name }}"
+    logging:
+      kafka:
+        topic:
+          name: "{{ .Values.global.logging.kafka.topic.name }}"
 
   env:
     - name: KEYCLOAK_ISSUER_URI
@@ -74,3 +78,5 @@ java-app:
         key: accounts.db.password
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
       value: "{{ .Values.global.kafka.bootstrapServers }}"
+    - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+      value: "{{ .Values.global.zipkin.tracing.endpoint }}"

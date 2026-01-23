@@ -43,20 +43,6 @@ java-app:
   autoscaling:
     enabled: false
 
-  livenessProbe:
-    exec:
-      command: ["pgrep", "-f", "java"]
-    initialDelaySeconds: 20
-    timeoutSeconds: 10
-    periodSeconds: 60
-
-  readinessProbe:
-    exec:
-      command: ["pgrep", "-f", "java"]
-    initialDelaySeconds: 20
-    timeoutSeconds: 10
-    periodSeconds: 60
-
   volumes: []
 
   volumeMounts: []
@@ -72,6 +58,10 @@ java-app:
       notifications:
         topic:
           name: "{{ .Values.global.kafka.notifications.topic.name }}"
+    logging:
+      kafka:
+        topic:
+          name: "{{ .Values.global.logging.kafka.topic.name }}"
 
   env:
     - name: KEYCLOAK_ISSUER_URI
@@ -80,3 +70,5 @@ java-app:
       value: "{{ .Values.global.kafka.bootstrapServers }}"
     - name: SPRING_KAFKA_CONSUMER_GROUP_ID
       value: "{{ .Release.Name }}-my-bank-notifications"
+    - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+      value: "{{ .Values.global.zipkin.tracing.endpoint }}"

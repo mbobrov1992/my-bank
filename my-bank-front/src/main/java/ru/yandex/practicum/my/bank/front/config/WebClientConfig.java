@@ -1,6 +1,7 @@
 package ru.yandex.practicum.my.bank.front.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
@@ -40,11 +41,11 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient.Builder webClientBuilder(
+    public WebClientCustomizer webClientCustomizer(
             ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter,
             ErrorHandlingFilter errorHandlingFilter
     ) {
-        return WebClient.builder()
+        return builder -> builder
                 .filter(oauth2Filter)
                 .filter(errorHandlingFilter);
     }

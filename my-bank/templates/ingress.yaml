@@ -15,6 +15,6 @@ spec:
               service:
                 name: {{ tpl .backendServiceName $ | quote }}
                 port:
-                  name: http
+                  name: {{ .backendServicePortName | default "http" }}
           {{- end }}
     {{- end }}

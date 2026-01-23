@@ -11,17 +11,13 @@ public class WebClientConfig {
 
     @Bean
     public WebClient accountWebClient(
+            WebClient.Builder webClientBuilder,
             ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Filter,
             @Value("${service.accounts.url}") String accountsUrl
     ) {
-        return webClientBuilder()
+        return webClientBuilder
                 .baseUrl(accountsUrl)
                 .filter(oauth2Filter)
                 .build();
-    }
-
-    @Bean
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
     }
 }

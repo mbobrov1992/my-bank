@@ -23,7 +23,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@$kafka:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -44,6 +44,70 @@ services:
     volumes:
       - keycloakdata:/opt/keycloak/data
 
+  zipkin:
+    image: openzipkin/zipkin:3.5
+    container_name: my-bank-zipkin
+    ports:
+      - "9411:9411"
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: my-bank-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ~/.prometheus/my-bank-prometheus.yml:/etc/prometheus/prometheus.yml
+      - ~/.prometheus/alerts/my-bank-rules.yml:/etc/prometheus/alerts/rules.yml
+
+  alertmanager:
+    image: prom/alertmanager:v0.30.1
+    container_name: my-bank-alertmanager
+    ports:
+      - "9095:9093"
+    volumes:
+      - ~/.prometheus/alerts/my-bank-alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    depends_on:
+      - prometheus
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    container_name: my-bank-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.4
+    container_name: my-bank-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.2.4
+    container_name: my-bank-logstash
+    volumes:
+      - ~/.logstash/pipeline/:/usr/share/logstash/pipeline/
+    depends_on:
+      - kafka
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.2.4
+    container_name: my-bank-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
   my-bank-front:
     image: my-bank-front:latest
     container_name: my-bank-front
@@ -53,9 +117,12 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_ID: ${FRONT_KEYCLOAK_CLIENT_ID}
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${FRONT_KEYCLOAK_CLIENT_SECRET}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       SERVICE_CASH_URL: http://my-bank-cash:8080
       SERVICE_TRANSFER_URL: http://my-bank-transfer:8080
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOGGING_KAFKA_TOPIC_NAME: my-bank-logs
     depends_on:
       - keycloak
 
@@ -74,6 +141,8 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOGGING_KAFKA_TOPIC_NAME: my-bank-logs
     depends_on:
       - postgres
       - keycloak
@@ -92,6 +161,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOGGING_KAFKA_TOPIC_NAME: my-bank-logs
     depends_on:
       - keycloak
       - kafka
@@ -109,6 +180,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SERVICE_ACCOUNTS_URL: http://my-bank-accounts:8080
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOGGING_KAFKA_TOPIC_NAME: my-bank-logs
     depends_on:
       - keycloak
       - kafka
@@ -121,6 +194,8 @@ services:
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_NOTIFICATIONS_TOPIC_NAME: my-bank-notifications
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+      LOGGING_KAFKA_TOPIC_NAME: my-bank-logs
     depends_on:
       - keycloak
       - kafka
@@ -129,3 +204,4 @@ volumes:
   pgdata:
   kafka-logs:
   keycloakdata:
+  grafana-data:

@@ -79,7 +79,8 @@ pipeline {
 					usernamePassword(credentialsId: 'accounts-db-creds', usernameVariable: 'ACCOUNTS_DB_USERNAME', passwordVariable: 'ACCOUNTS_DB_PASSWORD'),
 					string(credentialsId: 'keycloak-admin-password', variable: 'KEYCLOAK_ADMIN_PASSWORD'),
 					string(credentialsId: 'db-admin-password', variable: 'DB_ADMIN_PASSWORD'),
-					string(credentialsId: 'keycloak-db-password', variable: 'KEYCLOAK_DB_PASSWORD')
+					string(credentialsId: 'keycloak-db-password', variable: 'KEYCLOAK_DB_PASSWORD'),
+					string(credentialsId: 'alertmanager-telegram-bot-token', variable: 'TELEGRAM_BOT_TOKEN')
                 ]) {
 						sh '''
 						kubectl create secret generic my-bank-secret \
@@ -95,6 +96,7 @@ pipeline {
 							--from-literal=keycloak.admin.password=$KEYCLOAK_ADMIN_PASSWORD \
 							--from-literal=db.admin.password=$DB_ADMIN_PASSWORD \
 							--from-literal=keycloak.db.user.password=$KEYCLOAK_DB_PASSWORD \
+							--from-literal=alertmanager.telegram.bot.token=$TELEGRAM_BOT_TOKEN \
 							--dry-run=client -o yaml | kubectl apply -f -
 						'''
                 }
@@ -120,7 +122,9 @@ pipeline {
                 helm upgrade --install $RELEASE ./my-bank \
                 	--namespace $NAMESPACE \
 					--set global.image.registry=$IMAGE_REGISTRY \
-					--set global.image.tag=$IMAGE_TAG
+					--set global.image.tag=$IMAGE_TAG \
+					--wait --atomic \
+					--timeout=30m
                 '''
             }
         }
